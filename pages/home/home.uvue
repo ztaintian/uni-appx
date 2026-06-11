@@ -35,12 +35,26 @@
 					<text class="flash-title">⚡ 限时秒杀</text>
 					<text class="flash-more">更多 ></text>
 				</view>
-				<scroll-view class="flash-list" scroll-x="true">
-					<view class="flash-item" v-for="(item, index) in flashProducts" :key="item.id" @click="goDetail(item.id)">
-						<image class="flash-image" :src="item.image" mode="aspectFill"></image>
-						<text class="flash-price">¥{{ item.price }}</text>
+				<!-- #ifdef APP-HARMONY -->
+				<swiper class="flash-swiper" :display-multiple-items="3" :next-margin="'56rpx'" :previous-margin="'0rpx'">
+					<swiper-item v-for="(item, index) in flashProducts" :key="item.id">
+						<view class="flash-item flash-swiper-item" @click="goDetail(item.id)">
+							<image class="flash-image" :src="item.image" mode="aspectFill"></image>
+							<text class="flash-price">¥{{ item.price }}</text>
+						</view>
+					</swiper-item>
+				</swiper>
+				<!-- #endif -->
+				<!-- #ifndef APP-HARMONY -->
+				<scroll-view class="flash-scroll" scroll-x="true">
+					<view class="flash-scroll-inner" :style="{ width: flashListWidth }">
+						<view class="flash-item" v-for="(item, index) in flashProducts" :key="item.id" @click="goDetail(item.id)">
+							<image class="flash-image" :src="item.image" mode="aspectFill"></image>
+							<text class="flash-price">¥{{ item.price }}</text>
+						</view>
 					</view>
 				</scroll-view>
+				<!-- #endif -->
 			</view>
 
 			<view class="product-section">
@@ -87,7 +101,11 @@
 	]
 
 	const categories = HOME_CATEGORIES
-	const flashProducts = PRODUCTS.slice(0, 5)
+	const flashProducts = PRODUCTS.slice(0, 8)
+	const flashItemSpace = 210
+	const flashListWidth = computed(() : string => {
+		return (flashProducts.length * flashItemSpace).toString() + 'rpx'
+	})
 	const productColumns = computed(() : Product[][] => {
 		const left : Product[] = []
 		const right : Product[] = []
@@ -178,14 +196,15 @@
 	}
 
 	.banner-swiper {
-		height: 300rpx;
+		height: 240rpx;
 		margin: 16rpx 24rpx 0;
 		border-radius: 16rpx;
 		overflow: hidden;
 	}
 
 	.banner-item {
-		flex: 1;
+		width: 100%;
+		height: 240rpx;
 		align-items: center;
 		justify-content: center;
 		border-radius: 16rpx;
@@ -241,7 +260,7 @@
 		background-color: #ffffff;
 		margin: 0 24rpx 16rpx;
 		border-radius: 16rpx;
-		padding: 24rpx;
+		padding: 24rpx 22rpx 28rpx;
 	}
 
 	.flash-header {
@@ -262,27 +281,42 @@
 		color: #999999;
 	}
 
-	.flash-list {
+	.flash-swiper {
+		width: 100%;
+		height: 220rpx;
+	}
+
+	.flash-scroll {
+		width: 100%;
+		height: 220rpx;
+	}
+
+	.flash-scroll-inner {
+		height: 220rpx;
 		flex-direction: row;
 	}
 
 	.flash-item {
-		width: 160rpx;
+		width: 190rpx;
 		margin-right: 20rpx;
 		align-items: center;
 	}
 
+	.flash-swiper-item {
+		margin-right: 0;
+	}
+
 	.flash-image {
-		width: 140rpx;
-		height: 140rpx;
-		border-radius: 12rpx;
+		width: 176rpx;
+		height: 176rpx;
+		border-radius: 14rpx;
 	}
 
 	.flash-price {
-		font-size: 28rpx;
+		font-size: 30rpx;
 		color: #ff5000;
 		font-weight: bold;
-		margin-top: 8rpx;
+		margin-top: 10rpx;
 	}
 
 	.product-section {
