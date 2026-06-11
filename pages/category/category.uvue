@@ -1,0 +1,215 @@
+<template>
+	<view class="page">
+		<view class="nav-bar">
+			<view class="status-bar"></view>
+			<view class="nav-content">
+				<text class="nav-title">商品分类</text>
+			</view>
+		</view>
+
+		<view class="main">
+			<scroll-view class="sidebar" scroll-y="true">
+				<view
+					class="sidebar-item"
+					v-for="(cat, index) in sidebarCategories"
+					:key="cat.id"
+					:class="{ active: activeCategoryId == cat.id }"
+					@click="onSidebarClick(cat.id)"
+				>
+					<text class="sidebar-text" :class="{ active: activeCategoryId == cat.id }">{{ cat.name }}</text>
+				</view>
+			</scroll-view>
+
+			<scroll-view class="product-list" scroll-y="true">
+				<view class="list-header">
+					<text class="list-title">{{ activeCategoryName }}</text>
+				</view>
+				<view v-if="filteredProducts.length > 0" class="list-content">
+					<view
+						class="list-item"
+						v-for="(product, index) in filteredProducts"
+						:key="product.id"
+						@click="goDetail(product.id)"
+					>
+						<image class="list-image" :src="product.image" mode="aspectFill"></image>
+						<view class="list-info">
+							<text class="list-name">{{ product.title }}</text>
+							<view class="list-price-row">
+								<text class="list-price">¥{{ product.price }}</text>
+								<text class="list-sales">{{ product.sales }}人付款</text>
+							</view>
+						</view>
+					</view>
+				</view>
+				<EmptyState v-else icon="📦" text="该分类暂无商品" />
+			</scroll-view>
+		</view>
+
+		<AppTabBar currentKey="category" />
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { SIDEBAR_CATEGORIES } from '../../constants/categories.uts'
+	import { getProductsByCategory } from '../../constants/products.uts'
+	import { Product } from '../../constants/types.uts'
+	import AppTabBar from '../../components/AppTabBar.uvue'
+	import EmptyState from '../../components/EmptyState.uvue'
+
+	const sidebarCategories = SIDEBAR_CATEGORIES
+	const activeCategoryId = ref('all')
+
+	const activeCategoryName = computed(() : string => {
+		for (let i = 0; i < sidebarCategories.length; i++) {
+			if (sidebarCategories[i].id == activeCategoryId.value) {
+				return sidebarCategories[i].name
+			}
+		}
+		return '推荐'
+	})
+
+	const filteredProducts = computed(() : Product[] => {
+		return getProductsByCategory(activeCategoryId.value)
+	})
+
+	function onSidebarClick(catId : string) {
+		activeCategoryId.value = catId
+	}
+
+	function goDetail(productId : string) {
+		uni.navigateTo({
+			url: '/pages/product/detail?id=' + productId,
+		})
+	}
+
+</script>
+
+<style lang="scss">
+	.page {
+		flex: 1;
+		flex-direction: column;
+		background-color: #f5f5f5;
+	}
+
+	.nav-bar {
+		background-color: #ffffff;
+	}
+
+	.status-bar {
+		height: var(--status-bar-height);
+	}
+
+	.nav-content {
+		height: 88rpx;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nav-title {
+		font-size: 32rpx;
+		color: #333333;
+		font-weight: bold;
+	}
+
+	.main {
+		flex: 1;
+		flex-direction: row;
+	}
+
+	.sidebar {
+		width: 180rpx;
+		background-color: #f8f8f8;
+	}
+
+	.sidebar-item {
+		height: 96rpx;
+		align-items: center;
+		justify-content: center;
+		border-left-width: 6rpx;
+		border-left-style: solid;
+		border-left-color: transparent;
+	}
+
+	.sidebar-item.active {
+		background-color: #ffffff;
+		border-left-color: #ff5000;
+	}
+
+	.sidebar-text {
+		font-size: 26rpx;
+		color: #666666;
+	}
+
+	.sidebar-text.active {
+		color: #ff5000;
+		font-weight: bold;
+	}
+
+	.product-list {
+		flex: 1;
+		background-color: #ffffff;
+	}
+
+	.list-header {
+		padding: 24rpx;
+		border-bottom-width: 1rpx;
+		border-bottom-style: solid;
+		border-bottom-color: #f0f0f0;
+	}
+
+	.list-title {
+		font-size: 28rpx;
+		color: #333333;
+		font-weight: bold;
+	}
+
+	.list-content {
+		padding: 16rpx;
+	}
+
+	.list-item {
+		flex-direction: row;
+		padding: 16rpx;
+		border-bottom-width: 1rpx;
+		border-bottom-style: solid;
+		border-bottom-color: #f5f5f5;
+	}
+
+	.list-image {
+		width: 160rpx;
+		height: 160rpx;
+		border-radius: 12rpx;
+	}
+
+	.list-info {
+		flex: 1;
+		margin-left: 20rpx;
+		justify-content: space-between;
+		padding: 8rpx 0;
+	}
+
+	.list-name {
+		font-size: 26rpx;
+		color: #333333;
+		lines: 2;
+		text-overflow: ellipsis;
+		overflow: hidden;
+	}
+
+	.list-price-row {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.list-price {
+		font-size: 32rpx;
+		color: #ff5000;
+		font-weight: bold;
+	}
+
+	.list-sales {
+		font-size: 22rpx;
+		color: #999999;
+	}
+</style>

@@ -1,0 +1,188 @@
+import { CartItem } from '../constants/types.uts'
+
+const CART_STORAGE_KEY = 'taobao_cart_items'
+
+const cartItems = ref<CartItem[]>([])
+export const cartVersion = ref(0)
+
+function notifyChange() {
+	cartVersion.value++
+}
+
+function getStoredString(item : UTSJSONObject, key : string) : string {
+	const value = item.getString(key)
+	if (value == null) {
+		return ''
+	}
+	return value
+}
+
+function getStoredNumber(item : UTSJSONObject, key : string, defaultValue : number) : number {
+	const value = item.getNumber(key)
+	if (value == null) {
+		return defaultValue
+	}
+	return value
+}
+
+function getStoredBoolean(item : UTSJSONObject, key : string, defaultValue : boolean) : boolean {
+	const value = item.getBoolean(key)
+	if (value == null) {
+		return defaultValue
+	}
+	return value
+}
+
+function toCartItem(item : UTSJSONObject) : CartItem {
+	return {
+		productId: getStoredString(item, 'productId'),
+		title: getStoredString(item, 'title'),
+		price: getStoredNumber(item, 'price', 0),
+		image: getStoredString(item, 'image'),
+		quantity: getStoredNumber(item, 'quantity', 1),
+		checked: getStoredBoolean(item, 'checked', true),
+	}
+}
+
+function loadCart() {
+	const stored = uni.getStorageSync(CART_STORAGE_KEY)
+	if (stored != null && stored != '') {
+		try {
+			const parsed = JSON.parse(stored as string) as UTSJSONObject[]
+			const nextItems : CartItem[] = []
+			for (let i = 0; i < parsed.length; i++) {
+				const item = toCartItem(parsed[i])
+				if (item.productId != '') {
+					nextItems.push(item)
+				}
+			}
+			cartItems.value = nextItems
+		} catch (e) {
+			cartItems.value = []
+		}
+	}
+}
+
+function saveCart() {
+	uni.setStorageSync(CART_STORAGE_KEY, JSON.stringify(cartItems.value))
+}
+
+export function initCart() {
+	loadCart()
+}
+
+export function getCartItems() : CartItem[] {
+	return cartItems.value
+}
+
+export function getCartCount() : number {
+	let count = 0
+	for (let i = 0; i < cartItems.value.length; i++) {
+		count += cartItems.value[i].quantity
+	}
+	return count
+}
+
+export function getCheckedTotal() : number {
+	let total = 0
+	for (let i = 0; i < cartItems.value.length; i++) {
+		const item = cartItems.value[i]
+		if (item.checked) {
+			total += item.price * item.quantity
+		}
+	}
+	return total
+}
+
+export function isAllChecked() : boolean {
+	if (cartItems.value.length == 0) {
+		return false
+	}
+	for (let i = 0; i < cartItems.value.length; i++) {
+		if (!cartItems.value[i].checked) {
+			return false
+		}
+	}
+	return true
+}
+
+export function addToCart(productId : string, title : string, price : number, image : string, quantity : number = 1) {
+	let found = false
+	for (let i = 0; i < cartItems.value.length; i++) {
+		if (cartItems.value[i].productId == productId) {
+			cartItems.value[i].quantity += quantity
+			found = true
+			break
+		}
+	}
+	if (!found) {
+		const newItem : CartItem = {
+			productId: productId,
+			title: title,
+			price: price,
+			image: image,
+			quantity: quantity,
+			checked: true,
+		}
+		cartItems.value.push(newItem)
+	}
+	saveCart()
+	notifyChange()
+}
+
+export function updateQuantity(productId : string, quantity : number) {
+	for (let i = 0; i < cartItems.value.length; i++) {
+		if (cartItems.value[i].productId == productId) {
+			if (quantity <= 0) {
+				cartItems.value.splice(i, 1)
+			} else {
+				cartItems.value[i].quantity = quantity
+			}
+			break
+		}
+	}
+	saveCart()
+	notifyChange()
+}
+
+export function toggleItemChecked(productId : string, checked : boolean) {
+	for (let i = 0; i < cartItems.value.length; i++) {
+		if (cartItems.value[i].productId == productId) {
+			cartItems.value[i].checked = checked
+			break
+		}
+	}
+	saveCart()
+	notifyChange()
+}
+
+export function toggleAllChecked(checked : boolean) {
+	for (let i = 0; i < cartItems.value.length; i++) {
+		cartItems.value[i].checked = checked
+	}
+	saveCart()
+	notifyChange()
+}
+
+export function removeFromCart(productId : string) {
+	for (let i = 0; i < cartItems.value.length; i++) {
+		if (cartItems.value[i].productId == productId) {
+			cartItems.value.splice(i, 1)
+			break
+		}
+	}
+	saveCart()
+	notifyChange()
+}
+
+export function clearCheckedItems() {
+	const remaining : CartItem[] = []
+	for (let i = 0; i < cartItems.value.length; i++) {
+		if (!cartItems.value[i].checked) {
+			remaining.push(cartItems.value[i])
+		}
+	}
+	cartItems.value = remaining
+	saveCart()
+	notifyChange()
+}

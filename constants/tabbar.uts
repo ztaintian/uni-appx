@@ -1,0 +1,32 @@
+import { TabItem } from './types.uts'
+
+export const TAB_ITEMS : TabItem[] = [
+	{
+		key: 'home',
+		text: '首页',
+		icon: '🏠',
+		activeIcon: '🏠',
+		path: '/pages/home/home',
+	},
+	{
+		key: 'category',
+		text: '分类',
+		icon: '📋',
+		activeIcon: '📋',
+		path: '/pages/category/category',
+	},
+	{
+		key: 'cart',
+		text: '购物车',
+		icon: '🛒',
+		activeIcon: '🛒',
+		path: '/pages/cart/cart',
+	},
+	{
+		key: 'profile',
+		text: '我的',
+		icon: '👤',
+		activeIcon: '👤',
+		path: '/pages/profile/profile',
+	},
+]

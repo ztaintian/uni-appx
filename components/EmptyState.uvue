@@ -1,0 +1,67 @@
+<template>
+	<view class="empty-state">
+		<text class="empty-icon">{{ icon }}</text>
+		<text class="empty-text">{{ text }}</text>
+		<view v-if="showButton" class="empty-btn" @click="onAction">
+			<text class="empty-btn-text">{{ buttonText }}</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	const props = defineProps({
+		icon: {
+			type: String,
+			default: '📭',
+		},
+		text: {
+			type: String,
+			default: '暂无数据',
+		},
+		showButton: {
+			type: Boolean,
+			default: false,
+		},
+		buttonText: {
+			type: String,
+			default: '去看看',
+		},
+	})
+
+	const emit = defineEmits(['action'])
+
+	function onAction() {
+		emit('action')
+	}
+</script>
+
+<style lang="scss">
+	.empty-state {
+		flex: 1;
+		align-items: center;
+		justify-content: center;
+		padding: 80rpx 0;
+	}
+
+	.empty-icon {
+		font-size: 100rpx;
+		margin-bottom: 24rpx;
+	}
+
+	.empty-text {
+		font-size: 28rpx;
+		color: #999999;
+	}
+
+	.empty-btn {
+		margin-top: 32rpx;
+		background-color: #ff5000;
+		border-radius: 40rpx;
+		padding: 16rpx 48rpx;
+	}
+
+	.empty-btn-text {
+		font-size: 28rpx;
+		color: #ffffff;
+	}
+</style>

@@ -1,0 +1,448 @@
+<template>
+	<view class="page" v-if="product != null">
+		<scroll-view class="content" scroll-y="true">
+			<swiper class="image-swiper" circular indicator-dots indicator-color="rgba(0,0,0,0.3)" indicator-active-color="#ff5000">
+				<swiper-item>
+					<image class="product-image" :src="product!.image" mode="aspectFill"></image>
+				</swiper-item>
+			</swiper>
+
+			<view class="price-section">
+				<view class="price-row">
+					<text class="price-symbol">¥</text>
+					<text class="price-int">{{ priceInt }}</text>
+					<text class="price-dec">.{{ priceDec }}</text>
+					<text class="original-price">¥{{ product!.originalPrice }}</text>
+				</view>
+				<view class="tag-row" v-if="product!.tags.length > 0">
+					<text class="tag" v-for="(tag, index) in product!.tags" :key="index">{{ tag }}</text>
+				</view>
+			</view>
+
+			<view class="title-section">
+				<text class="product-title">{{ product!.title }}</text>
+				<text class="product-sales">已售 {{ salesText }}</text>
+			</view>
+
+			<view class="spec-section">
+				<view class="spec-row">
+					<text class="spec-label">选择</text>
+					<text class="spec-value">颜色、规格</text>
+					<text class="spec-arrow">></text>
+				</view>
+				<view class="spec-row">
+					<text class="spec-label">配送</text>
+					<text class="spec-value">快递 免运费 · 预计明天送达</text>
+				</view>
+				<view class="spec-row">
+					<text class="spec-label">保障</text>
+					<text class="spec-value">正品保障 · 7天无理由退换</text>
+				</view>
+			</view>
+
+			<view class="shop-section">
+				<view class="shop-info">
+					<view class="shop-avatar">
+						<text class="shop-avatar-text">旗</text>
+					</view>
+					<view class="shop-detail">
+						<text class="shop-name">官方旗舰店</text>
+						<text class="shop-desc">综合体验 ★★★★★ 4.9分</text>
+					</view>
+				</view>
+				<view class="shop-btn">
+					<text class="shop-btn-text">进店逛逛</text>
+				</view>
+			</view>
+
+			<view class="detail-section">
+				<text class="detail-title">商品详情</text>
+				<view class="detail-content">
+					<text class="detail-text">本商品为演示数据，仅供展示淘宝风格购物 App 界面效果。</text>
+					<text class="detail-text">商品信息、价格、库存均为模拟数据，不代表真实商品。</text>
+				</view>
+			</view>
+
+			<view class="bottom-space"></view>
+		</scroll-view>
+
+		<view class="action-bar">
+			<view class="action-icons">
+				<view class="action-item" @click="goHome">
+					<text class="action-icon">🏠</text>
+					<text class="action-text">首页</text>
+				</view>
+				<view class="action-item" @click="goCart">
+					<text class="action-icon">🛒</text>
+					<text class="action-text">购物车</text>
+				</view>
+			</view>
+			<view class="action-btns">
+				<view class="btn-cart" @click="onAddCart">
+					<text class="btn-cart-text">加入购物车</text>
+				</view>
+				<view class="btn-buy" @click="onBuyNow">
+					<text class="btn-buy-text">立即购买</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { getProductById } from '../../constants/products.uts'
+	import { Product } from '../../constants/types.uts'
+	import { addToCart, initCart } from '../../utils/cart.uts'
+	import { formatPrice, formatSales } from '../../utils/format.uts'
+
+	const product = ref<Product | null>(null)
+
+	const priceParts = computed(() : string[] => {
+		if (product.value == null) {
+			return ['0', '00']
+		}
+		return formatPrice(product.value.price).split('.')
+	})
+
+	const priceInt = computed(() : string => {
+		return priceParts.value[0]
+	})
+
+	const priceDec = computed(() : string => {
+		return priceParts.value.length > 1 ? priceParts.value[1] : '00'
+	})
+
+	const salesText = computed(() : string => {
+		if (product.value == null) {
+			return '0'
+		}
+		return formatSales(product.value.sales)
+	})
+
+	function onAddCart() {
+		if (product.value == null) {
+			return
+		}
+		addToCart(product.value.id, product.value.title, product.value.price, product.value.image, 1)
+		uni.showToast({
+			title: '已加入购物车',
+			icon: 'success',
+		})
+	}
+
+	function onBuyNow() {
+		if (product.value == null) {
+			return
+		}
+		addToCart(product.value.id, product.value.title, product.value.price, product.value.image, 1)
+		uni.reLaunch({
+			url: '/pages/cart/cart',
+		})
+	}
+
+	function goHome() {
+		uni.reLaunch({
+			url: '/pages/home/home',
+		})
+	}
+
+	function goCart() {
+		uni.reLaunch({
+			url: '/pages/cart/cart',
+		})
+	}
+
+	onLoad((options : UTSJSONObject) => {
+		initCart()
+		const id = options.getString('id')
+		if (id != null && id != '') {
+			product.value = getProductById(id)
+		}
+		if (product.value == null) {
+			uni.showToast({
+				title: '商品不存在',
+				icon: 'none',
+			})
+			setTimeout(() => {
+				uni.navigateBack()
+			}, 1500)
+		}
+	})
+</script>
+
+<style lang="scss">
+	.page {
+		flex: 1;
+		flex-direction: column;
+		background-color: #f5f5f5;
+	}
+
+	.content {
+		flex: 1;
+	}
+
+	.image-swiper {
+		height: 750rpx;
+		background-color: #ffffff;
+	}
+
+	.product-image {
+		width: 100%;
+		height: 750rpx;
+	}
+
+	.price-section {
+		background-color: #ffffff;
+		padding: 24rpx;
+	}
+
+	.price-row {
+		flex-direction: row;
+		align-items: flex-end;
+	}
+
+	.price-symbol {
+		font-size: 28rpx;
+		color: #ff5000;
+		font-weight: bold;
+		margin-bottom: 4rpx;
+	}
+
+	.price-int {
+		font-size: 52rpx;
+		color: #ff5000;
+		font-weight: bold;
+	}
+
+	.price-dec {
+		font-size: 28rpx;
+		color: #ff5000;
+		font-weight: bold;
+		margin-bottom: 4rpx;
+	}
+
+	.original-price {
+		font-size: 26rpx;
+		color: #999999;
+		text-decoration: line-through;
+		margin-left: 16rpx;
+		margin-bottom: 6rpx;
+	}
+
+	.tag-row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		margin-top: 12rpx;
+	}
+
+	.tag {
+		font-size: 22rpx;
+		color: #ff5000;
+		background-color: #fff1eb;
+		padding: 4rpx 12rpx;
+		border-radius: 4rpx;
+		margin-right: 12rpx;
+		margin-top: 4rpx;
+	}
+
+	.title-section {
+		background-color: #ffffff;
+		padding: 0 24rpx 24rpx;
+		margin-top: 2rpx;
+	}
+
+	.product-title {
+		font-size: 32rpx;
+		color: #333333;
+		line-height: 44rpx;
+	}
+
+	.product-sales {
+		font-size: 24rpx;
+		color: #999999;
+		margin-top: 12rpx;
+	}
+
+	.spec-section {
+		background-color: #ffffff;
+		margin-top: 16rpx;
+		padding: 0 24rpx;
+	}
+
+	.spec-row {
+		flex-direction: row;
+		align-items: center;
+		padding: 24rpx 0;
+		border-bottom-width: 1rpx;
+		border-bottom-style: solid;
+		border-bottom-color: #f5f5f5;
+	}
+
+	.spec-label {
+		font-size: 26rpx;
+		color: #999999;
+		width: 80rpx;
+	}
+
+	.spec-value {
+		flex: 1;
+		font-size: 26rpx;
+		color: #333333;
+	}
+
+	.spec-arrow {
+		font-size: 24rpx;
+		color: #cccccc;
+	}
+
+	.shop-section {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		background-color: #ffffff;
+		margin-top: 16rpx;
+		padding: 24rpx;
+	}
+
+	.shop-info {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.shop-avatar {
+		width: 80rpx;
+		height: 80rpx;
+		border-radius: 12rpx;
+		background-color: #ff5000;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.shop-avatar-text {
+		font-size: 32rpx;
+		color: #ffffff;
+		font-weight: bold;
+	}
+
+	.shop-detail {
+		margin-left: 16rpx;
+	}
+
+	.shop-name {
+		font-size: 28rpx;
+		color: #333333;
+		font-weight: bold;
+	}
+
+	.shop-desc {
+		font-size: 22rpx;
+		color: #999999;
+		margin-top: 4rpx;
+	}
+
+	.shop-btn {
+		border-width: 1rpx;
+		border-style: solid;
+		border-color: #ff5000;
+		border-radius: 32rpx;
+		padding: 10rpx 24rpx;
+	}
+
+	.shop-btn-text {
+		font-size: 24rpx;
+		color: #ff5000;
+	}
+
+	.detail-section {
+		background-color: #ffffff;
+		margin-top: 16rpx;
+		padding: 24rpx;
+	}
+
+	.detail-title {
+		font-size: 30rpx;
+		color: #333333;
+		font-weight: bold;
+		margin-bottom: 16rpx;
+	}
+
+	.detail-content {
+		padding: 16rpx 0;
+	}
+
+	.detail-text {
+		font-size: 26rpx;
+		color: #666666;
+		line-height: 40rpx;
+		margin-bottom: 8rpx;
+	}
+
+	.bottom-space {
+		height: 120rpx;
+	}
+
+	.action-bar {
+		flex-direction: row;
+		align-items: center;
+		background-color: #ffffff;
+		padding: 12rpx 24rpx;
+		border-top-width: 1rpx;
+		border-top-style: solid;
+		border-top-color: #eeeeee;
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+
+	.action-icons {
+		flex-direction: row;
+	}
+
+	.action-item {
+		align-items: center;
+		margin-right: 32rpx;
+	}
+
+	.action-icon {
+		font-size: 36rpx;
+	}
+
+	.action-text {
+		font-size: 20rpx;
+		color: #666666;
+		margin-top: 2rpx;
+	}
+
+	.action-btns {
+		flex: 1;
+		flex-direction: row;
+	}
+
+	.btn-cart {
+		flex: 1;
+		background-color: #ff8c00;
+		border-top-left-radius: 40rpx;
+		border-bottom-left-radius: 40rpx;
+		padding: 20rpx 0;
+		align-items: center;
+	}
+
+	.btn-cart-text {
+		font-size: 28rpx;
+		color: #ffffff;
+		font-weight: bold;
+	}
+
+	.btn-buy {
+		flex: 1;
+		background-color: #ff5000;
+		border-top-right-radius: 40rpx;
+		border-bottom-right-radius: 40rpx;
+		padding: 20rpx 0;
+		align-items: center;
+	}
+
+	.btn-buy-text {
+		font-size: 28rpx;
+		color: #ffffff;
+		font-weight: bold;
+	}
+</style>

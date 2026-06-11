@@ -1,0 +1,350 @@
+<template>
+	<view class="page">
+		<view class="nav-bar">
+			<view class="status-bar"></view>
+			<view class="nav-content">
+				<text class="nav-title">购物车</text>
+				<text class="nav-count" v-if="cartList.length > 0">({{ cartList.length }})</text>
+			</view>
+		</view>
+
+		<scroll-view v-if="cartList.length > 0" class="cart-list" scroll-y="true">
+			<view class="cart-item" v-for="(item, index) in cartList" :key="item.productId">
+				<view class="cart-check" @click="onToggleItem(item.productId, !item.checked)">
+					<text class="check-icon">{{ item.checked ? '☑️' : '⬜' }}</text>
+				</view>
+				<image class="cart-image" :src="item.image" mode="aspectFill" @click="goDetail(item.productId)"></image>
+				<view class="cart-info">
+					<text class="cart-title" @click="goDetail(item.productId)">{{ item.title }}</text>
+					<view class="cart-bottom">
+						<text class="cart-price">¥{{ item.price }}</text>
+						<view class="quantity-control">
+							<view class="qty-btn" @click="onDecrease(item)">
+								<text class="qty-btn-text">-</text>
+							</view>
+							<text class="qty-num">{{ item.quantity }}</text>
+							<view class="qty-btn" @click="onIncrease(item)">
+								<text class="qty-btn-text">+</text>
+							</view>
+						</view>
+					</view>
+				</view>
+				<view class="cart-delete" @click="onDelete(item.productId)">
+					<text class="delete-text">删除</text>
+				</view>
+			</view>
+			<view class="bottom-space"></view>
+		</scroll-view>
+
+		<EmptyState
+			v-else
+			icon="🛒"
+			text="购物车空空如也"
+			:showButton="true"
+			buttonText="去逛逛"
+			@action="goHome"
+		/>
+
+		<view v-if="cartList.length > 0" class="cart-footer">
+			<view class="footer-check" @click="onToggleAll">
+				<text class="check-icon">{{ allChecked ? '☑️' : '⬜' }}</text>
+				<text class="footer-check-text">全选</text>
+			</view>
+			<view class="footer-total">
+				<text class="total-label">合计：</text>
+				<text class="total-price">¥{{ totalPrice }}</text>
+			</view>
+			<view class="checkout-btn" :class="{ disabled: checkedCount == 0 }" @click="onCheckout">
+				<text class="checkout-text">结算({{ checkedCount }})</text>
+			</view>
+		</view>
+
+		<AppTabBar currentKey="cart" />
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { CartItem } from '../../constants/types.uts'
+	import {
+		getCartItems,
+		getCheckedTotal,
+		isAllChecked,
+		toggleItemChecked,
+		toggleAllChecked,
+		updateQuantity,
+		removeFromCart,
+		initCart,
+	} from '../../utils/cart.uts'
+	import { formatPrice } from '../../utils/format.uts'
+	import AppTabBar from '../../components/AppTabBar.uvue'
+	import EmptyState from '../../components/EmptyState.uvue'
+
+	const cartList = ref<CartItem[]>([])
+
+	const allChecked = computed(() : boolean => {
+		return isAllChecked()
+	})
+
+	const totalPrice = computed(() : string => {
+		return formatPrice(getCheckedTotal())
+	})
+
+	const checkedCount = computed(() : number => {
+		let count = 0
+		for (let i = 0; i < cartList.value.length; i++) {
+			if (cartList.value[i].checked) {
+				count += cartList.value[i].quantity
+			}
+		}
+		return count
+	})
+
+	function refreshCart() {
+		cartList.value = getCartItems()
+	}
+
+	function onToggleItem(productId : string, checked : boolean) {
+		toggleItemChecked(productId, checked)
+		refreshCart()
+	}
+
+	function onToggleAll() {
+		toggleAllChecked(!allChecked.value)
+		refreshCart()
+	}
+
+	function onDecrease(item : CartItem) {
+		updateQuantity(item.productId, item.quantity - 1)
+		refreshCart()
+	}
+
+	function onIncrease(item : CartItem) {
+		updateQuantity(item.productId, item.quantity + 1)
+		refreshCart()
+	}
+
+	function onDelete(productId : string) {
+		removeFromCart(productId)
+		refreshCart()
+	}
+
+	function onCheckout() {
+		if (checkedCount.value == 0) {
+			return
+		}
+		uni.showToast({
+			title: '结算功能开发中',
+			icon: 'none',
+		})
+	}
+
+	function goDetail(productId : string) {
+		uni.navigateTo({
+			url: '/pages/product/detail?id=' + productId,
+		})
+	}
+
+	function goHome() {
+		uni.reLaunch({
+			url: '/pages/home/home',
+		})
+	}
+
+	onLoad(() => {
+		initCart()
+	})
+
+	onShow(() => {
+		refreshCart()
+	})
+</script>
+
+<style lang="scss">
+	.page {
+		flex: 1;
+		flex-direction: column;
+		background-color: #f5f5f5;
+	}
+
+	.nav-bar {
+		background-color: #ffffff;
+	}
+
+	.status-bar {
+		height: var(--status-bar-height);
+	}
+
+	.nav-content {
+		height: 88rpx;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nav-title {
+		font-size: 32rpx;
+		color: #333333;
+		font-weight: bold;
+	}
+
+	.nav-count {
+		font-size: 26rpx;
+		color: #999999;
+		margin-left: 8rpx;
+	}
+
+	.cart-list {
+		flex: 1;
+	}
+
+	.cart-item {
+		flex-direction: row;
+		align-items: center;
+		background-color: #ffffff;
+		margin: 16rpx 24rpx 0;
+		border-radius: 16rpx;
+		padding: 20rpx;
+	}
+
+	.cart-check {
+		padding: 8rpx;
+	}
+
+	.check-icon {
+		font-size: 36rpx;
+	}
+
+	.cart-image {
+		width: 160rpx;
+		height: 160rpx;
+		border-radius: 12rpx;
+		margin-left: 8rpx;
+	}
+
+	.cart-info {
+		flex: 1;
+		margin-left: 20rpx;
+		justify-content: space-between;
+		height: 160rpx;
+		padding: 8rpx 0;
+	}
+
+	.cart-title {
+		font-size: 26rpx;
+		color: #333333;
+		lines: 2;
+		text-overflow: ellipsis;
+		overflow: hidden;
+	}
+
+	.cart-bottom {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.cart-price {
+		font-size: 32rpx;
+		color: #ff5000;
+		font-weight: bold;
+	}
+
+	.quantity-control {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.qty-btn {
+		width: 48rpx;
+		height: 48rpx;
+		border-width: 1rpx;
+		border-style: solid;
+		border-color: #dddddd;
+		border-radius: 8rpx;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.qty-btn-text {
+		font-size: 28rpx;
+		color: #666666;
+	}
+
+	.qty-num {
+		font-size: 28rpx;
+		color: #333333;
+		margin: 0 20rpx;
+		min-width: 40rpx;
+		text-align: center;
+	}
+
+	.cart-delete {
+		padding: 8rpx 12rpx;
+		margin-left: 8rpx;
+	}
+
+	.delete-text {
+		font-size: 24rpx;
+		color: #999999;
+	}
+
+	.cart-footer {
+		flex-direction: row;
+		align-items: center;
+		background-color: #ffffff;
+		padding: 16rpx 24rpx;
+		border-top-width: 1rpx;
+		border-top-style: solid;
+		border-top-color: #eeeeee;
+		margin-bottom: 100rpx;
+	}
+
+	.footer-check {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.footer-check-text {
+		font-size: 26rpx;
+		color: #333333;
+		margin-left: 8rpx;
+	}
+
+	.footer-total {
+		flex: 1;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+		margin-right: 20rpx;
+	}
+
+	.total-label {
+		font-size: 26rpx;
+		color: #333333;
+	}
+
+	.total-price {
+		font-size: 36rpx;
+		color: #ff5000;
+		font-weight: bold;
+	}
+
+	.checkout-btn {
+		background-color: #ff5000;
+		border-radius: 40rpx;
+		padding: 16rpx 40rpx;
+	}
+
+	.checkout-btn.disabled {
+		opacity: 0.5;
+	}
+
+	.checkout-text {
+		font-size: 28rpx;
+		color: #ffffff;
+	}
+
+	.bottom-space {
+		height: 20rpx;
+	}
+</style>

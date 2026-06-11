@@ -1,0 +1,111 @@
+<template>
+	<view class="tabbar">
+		<view
+			class="tabbar-item"
+			v-for="(item, index) in tabItems"
+			:key="item.key"
+			@click="onTabClick(item)"
+		>
+			<view class="tabbar-icon-wrap">
+				<text class="tabbar-icon" :class="{ active: currentKey == item.key }">{{ currentKey == item.key ? item.activeIcon : item.icon }}</text>
+				<view v-if="item.key == 'cart' && cartCount > 0" class="tabbar-badge">
+					<text class="tabbar-badge-text">{{ cartCount > 99 ? '99+' : cartCount.toString() }}</text>
+				</view>
+			</view>
+			<text class="tabbar-text" :class="{ active: currentKey == item.key }">{{ item.text }}</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { TAB_ITEMS } from '../constants/tabbar.uts'
+	import { TabItem } from '../constants/types.uts'
+	import { cartVersion, getCartCount } from '../utils/cart.uts'
+
+	const props = defineProps({
+		currentKey: {
+			type: String,
+			default: 'home',
+		},
+	})
+
+	const tabItems = TAB_ITEMS
+
+	const cartCount = computed(() : number => {
+		cartVersion.value
+		return getCartCount()
+	})
+
+	function onTabClick(item : TabItem) {
+		if (item.key == props.currentKey) {
+			return
+		}
+		uni.reLaunch({
+			url: item.path,
+		})
+	}
+</script>
+
+<style lang="scss">
+	.tabbar {
+		flex-direction: row;
+		height: 100rpx;
+		background-color: #ffffff;
+		border-top-width: 1rpx;
+		border-top-style: solid;
+		border-top-color: #eeeeee;
+	}
+
+	.tabbar-item {
+		flex: 1;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.tabbar-icon-wrap {
+		position: relative;
+		width: 48rpx;
+		height: 48rpx;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.tabbar-icon {
+		font-size: 40rpx;
+		opacity: 0.6;
+	}
+
+	.tabbar-icon.active {
+		opacity: 1;
+	}
+
+	.tabbar-badge {
+		position: absolute;
+		top: -8rpx;
+		right: -16rpx;
+		background-color: #ff5000;
+		border-radius: 20rpx;
+		min-width: 32rpx;
+		height: 32rpx;
+		align-items: center;
+		justify-content: center;
+		padding-left: 8rpx;
+		padding-right: 8rpx;
+	}
+
+	.tabbar-badge-text {
+		font-size: 18rpx;
+		color: #ffffff;
+	}
+
+	.tabbar-text {
+		font-size: 22rpx;
+		color: #666666;
+		margin-top: 4rpx;
+	}
+
+	.tabbar-text.active {
+		color: #ff5000;
+	}
+</style>

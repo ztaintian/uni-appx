@@ -1,0 +1,41 @@
+.page-container {
+	flex: 1;
+	flex-direction: column;
+	background-color: $color-bg;
+}
+
+.flex-row {
+	flex-direction: row;
+}
+
+.flex-col {
+	flex-direction: column;
+}
+
+.flex-center {
+	align-items: center;
+	justify-content: center;
+}
+
+.text-ellipsis {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.price-symbol {
+	font-size: 24rpx;
+	color: $color-price;
+	font-weight: bold;
+}
+
+.price-int {
+	font-size: 36rpx;
+	color: $color-price;
+	font-weight: bold;
+}
+
+.price-dec {
+	font-size: 24rpx;
+	color: $color-price;
+	font-weight: bold;
+}

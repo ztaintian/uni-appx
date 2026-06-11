@@ -1,0 +1,126 @@
+import { Product } from './types.uts'
+
+export const PRODUCTS : Product[] = [
+	{
+		id: 'p001',
+		title: 'Apple iPhone 16 Pro Max 256GB 钛金属',
+		price: 9999,
+		originalPrice: 10999,
+		sales: 12580,
+		image: 'https://picsum.photos/400/400?random=1',
+		categoryId: 'digital',
+		tags: ['包邮', '正品保障'],
+	},
+	{
+		id: 'p002',
+		title: '华为 Mate 70 Pro 智能手机 12GB+512GB',
+		price: 6999,
+		originalPrice: 7999,
+		sales: 8960,
+		image: 'https://picsum.photos/400/400?random=2',
+		categoryId: 'digital',
+		tags: ['新品', '分期免息'],
+	},
+	{
+		id: 'p003',
+		title: '优衣库 男士纯棉圆领短袖T恤 多色可选',
+		price: 79,
+		originalPrice: 99,
+		sales: 35600,
+		image: 'https://picsum.photos/400/400?random=3',
+		categoryId: 'fashion',
+		tags: ['热卖', '满减'],
+	},
+	{
+		id: 'p004',
+		title: '三只松鼠 坚果大礼包 1500g 送礼佳品',
+		price: 89.9,
+		originalPrice: 128,
+		sales: 52300,
+		image: 'https://picsum.photos/400/400?random=4',
+		categoryId: 'food',
+		tags: ['包邮', '次日达'],
+	},
+	{
+		id: 'p005',
+		title: '雅诗兰黛 小棕瓶精华 50ml 修护抗老',
+		price: 680,
+		originalPrice: 890,
+		sales: 18900,
+		image: 'https://picsum.photos/400/400?random=5',
+		categoryId: 'beauty',
+		tags: ['官方旗舰', '赠小样'],
+	},
+	{
+		id: 'p006',
+		title: '戴森 V15 Detect 无线吸尘器 除螨',
+		price: 4490,
+		originalPrice: 5490,
+		sales: 6780,
+		image: 'https://picsum.photos/400/400?random=6',
+		categoryId: 'home',
+		tags: ['分期免息', '以旧换新'],
+	},
+	{
+		id: 'p007',
+		title: 'Nike Air Max 270 男子运动鞋 透气缓震',
+		price: 699,
+		originalPrice: 899,
+		sales: 23400,
+		image: 'https://picsum.photos/400/400?random=7',
+		categoryId: 'sport',
+		tags: ['品牌直营', '包邮'],
+	},
+	{
+		id: 'p008',
+		title: '小米 Redmi Book Pro 16 2024款 轻薄本',
+		price: 4999,
+		originalPrice: 5699,
+		sales: 9870,
+		image: 'https://picsum.photos/400/400?random=8',
+		categoryId: 'digital',
+		tags: ['新品', '12期免息'],
+	},
+	{
+		id: 'p009',
+		title: '花王 纸尿裤 L码 54片 超薄透气',
+		price: 89,
+		originalPrice: 119,
+		sales: 41200,
+		image: 'https://picsum.photos/400/400?random=9',
+		categoryId: 'baby',
+		tags: ['热卖', '次日达'],
+	},
+	{
+		id: 'p010',
+		title: 'Kindle Paperwhite 5 电子书阅读器 8GB',
+		price: 1099,
+		originalPrice: 1399,
+		sales: 7650,
+		image: 'https://picsum.photos/400/400?random=10',
+		categoryId: 'book',
+		tags: ['包邮', '正品保障'],
+	},
+]
+
+export function getProductById(id : string) : Product | null {
+	for (let i = 0; i < PRODUCTS.length; i++) {
+		if (PRODUCTS[i].id == id) {
+			return PRODUCTS[i]
+		}
+	}
+	return null
+}
+
+export function getProductsByCategory(categoryId : string) : Product[] {
+	if (categoryId == 'all') {
+		return PRODUCTS
+	}
+	const result : Product[] = []
+	for (let i = 0; i < PRODUCTS.length; i++) {
+		if (PRODUCTS[i].categoryId == categoryId) {
+			result.push(PRODUCTS[i])
+		}
+	}
+	return result
+}

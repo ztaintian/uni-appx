@@ -1,10 +1,13 @@
 <script setup lang="uts">
+	import { initCart } from './utils/cart.uts'
+
 	// #ifdef APP-ANDROID || APP-HARMONY
 	let firstBackTime = 0
 	// #endif
 
 	onLaunch(() => {
 		console.log('App Launch')
+		initCart()
 	})
 
 	onAppShow(() => {

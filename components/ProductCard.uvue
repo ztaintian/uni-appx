@@ -1,0 +1,132 @@
+<template>
+	<view class="product-card" @click="onClick">
+		<image class="product-image" :src="product.image" mode="aspectFill"></image>
+		<view class="product-info">
+			<text class="product-title">{{ product.title }}</text>
+			<view class="product-tags" v-if="product.tags.length > 0">
+				<text class="product-tag" v-for="(tag, index) in product.tags" :key="index">{{ tag }}</text>
+			</view>
+			<view class="product-bottom">
+				<view class="product-price-row">
+					<text class="price-symbol">¥</text>
+					<text class="price-int">{{ priceInt }}</text>
+					<text class="price-dec">.{{ priceDec }}</text>
+				</view>
+				<text class="product-sales">{{ salesText }}人付款</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { Product } from '../constants/types.uts'
+	import { formatPrice, formatSales } from '../utils/format.uts'
+
+	type Props = {
+		product : Product
+	}
+
+	const props = defineProps<Props>()
+
+	const emit = defineEmits(['click'])
+
+	const priceParts = computed(() : string[] => {
+		return formatPrice(props.product.price).split('.')
+	})
+
+	const priceInt = computed(() : string => {
+		return priceParts.value[0]
+	})
+
+	const priceDec = computed(() : string => {
+		return priceParts.value.length > 1 ? priceParts.value[1] : '00'
+	})
+
+	const salesText = computed(() : string => {
+		return formatSales(props.product.sales)
+	})
+
+	function onClick() {
+		emit('click', props.product.id)
+	}
+</script>
+
+<style lang="scss">
+	.product-card {
+		background-color: #ffffff;
+		border-radius: 16rpx;
+		overflow: hidden;
+		margin-bottom: 16rpx;
+	}
+
+	.product-image {
+		width: 100%;
+		height: 340rpx;
+	}
+
+	.product-info {
+		padding: 16rpx;
+	}
+
+	.product-title {
+		font-size: 26rpx;
+		color: #333333;
+		lines: 2;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		line-height: 36rpx;
+	}
+
+	.product-tags {
+		flex-direction: row;
+		flex-wrap: wrap;
+		margin-top: 8rpx;
+	}
+
+	.product-tag {
+		font-size: 20rpx;
+		color: #ff5000;
+		background-color: #fff1eb;
+		padding: 2rpx 8rpx;
+		border-radius: 4rpx;
+		margin-right: 8rpx;
+		margin-top: 4rpx;
+	}
+
+	.product-bottom {
+		flex-direction: row;
+		align-items: flex-end;
+		justify-content: space-between;
+		margin-top: 12rpx;
+	}
+
+	.product-price-row {
+		flex-direction: row;
+		align-items: flex-end;
+	}
+
+	.price-symbol {
+		font-size: 24rpx;
+		color: #ff5000;
+		font-weight: bold;
+		margin-bottom: 2rpx;
+	}
+
+	.price-int {
+		font-size: 36rpx;
+		color: #ff5000;
+		font-weight: bold;
+	}
+
+	.price-dec {
+		font-size: 24rpx;
+		color: #ff5000;
+		font-weight: bold;
+		margin-bottom: 2rpx;
+	}
+
+	.product-sales {
+		font-size: 22rpx;
+		color: #999999;
+	}
+</style>
