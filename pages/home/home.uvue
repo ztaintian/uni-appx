@@ -35,18 +35,9 @@
 					<text class="flash-title">⚡ 限时秒杀</text>
 					<text class="flash-more">更多 ></text>
 				</view>
-				<!-- #ifdef APP-HARMONY -->
-				<swiper class="flash-swiper" :display-multiple-items="3" :next-margin="'56rpx'" :previous-margin="'0rpx'">
-					<swiper-item v-for="(item, index) in flashProducts" :key="item.id">
-						<view class="flash-item flash-swiper-item" @click="goDetail(item.id)">
-							<image class="flash-image" :src="item.image" mode="aspectFill"></image>
-							<text class="flash-price">¥{{ item.price }}</text>
-						</view>
-					</swiper-item>
-				</swiper>
-				<!-- #endif -->
-				<!-- #ifndef APP-HARMONY -->
-				<scroll-view class="flash-scroll" scroll-x="true">
+				
+			
+				<scroll-view class="flash-scroll" :direction="'horizontal'" :show-scrollbar="false">
 					<view class="flash-scroll-inner" :style="{ width: flashListWidth }">
 						<view class="flash-item" v-for="(item, index) in flashProducts" :key="item.id" @click="goDetail(item.id)">
 							<image class="flash-image" :src="item.image" mode="aspectFill"></image>
@@ -54,7 +45,7 @@
 						</view>
 					</view>
 				</scroll-view>
-				<!-- #endif -->
+				
 			</view>
 
 			<view class="product-section">
